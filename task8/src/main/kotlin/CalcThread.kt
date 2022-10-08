@@ -10,14 +10,12 @@ class CalcThread(
         var start = idCurrentThread.toLong()
         var counter: Long = 0
         var limit = Long.MAX_VALUE
-        var syncFlag = true
 
-        while (counter < limit || syncFlag) {
+        while (counter < limit) {
             sum += calculate(start)
             start += threadsNum
             counter++
-            if(!sync.flagForContinue && syncFlag){
-                syncFlag = false
+            if(!sync.flagForContinue){
                 limit = sync.waitThreads(counter)
             }
         }
