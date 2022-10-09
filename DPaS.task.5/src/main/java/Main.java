@@ -1,12 +1,24 @@
+import java.util.Timer;
+import java.util.TimerTask;
+
+
 public class Main {
     public static void main(String[] argc) {
         ChildThread ct = new ChildThread();
-        ct.start();
-        try {
-            Thread.sleep(2000);
-            ct.interrupt();
-        } catch (InterruptedException ignored) {
-        }
-        System.out.println("Main thread finished...");
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                ct.start();
+            }
+        }, 0);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                ct.interrupt();
+                timer.cancel();
+                System.out.println("Timer thread finished...");
+            }
+        }, 2000);
     }
 }
