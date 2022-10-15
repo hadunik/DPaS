@@ -1,39 +1,52 @@
-class MyList<T : Comparable<T>> {
-    private data class Node<T>(var value: T, var next: Node<T>?)
+import java.util.concurrent.locks.ReentrantLock
 
+class MyList<T : Comparable<T>> {
+    private data class Node<T>(var value: T, val next: Node<T>?, var mutex: ReentrantLock)
+
+    @Volatile
     private var head: Node<T>? = null
 
     fun add(forAdd: T) {
-        synchronized(this) {
-            head = Node(forAdd, head)
-        }
+        head = Node(forAdd, head, ReentrantLock())
     }
 
     fun print() {
-        synchronized(this) {
-            var it = head;
-            while (it != null) {
+        var it = head;
+        while (it != null) {
+            it.mutex.lock()
+            try {
                 println(it.value)
+            } finally {
+                it.mutex.unlock()
                 it = it.next
             }
         }
     }
 
     fun sort() {
-        synchronized(this) {
-            var i = head
-            while (i != null) {
+        var i = head
+        while (i != null) {
+            i.mutex.lock()
+            try {
                 var j = i.next
                 while (j != null) {
-                    if (i.value > j.value) {
-                        val tmp = i.value
-                        i.value = j.value
-                        j.value = tmp
+                    j.mutex.lock()
+                    try {
+                        if (i.value > j.value) {
+                            val tmp = i.value
+                            i.value = j.value
+                            j.value = tmp
+                        }
+                    } finally {
+                        j.mutex.unlock()
+                        j = j.next
                     }
-                    j = j.next
                 }
+            } finally {
+                i.mutex.unlock()
                 i = i.next
             }
         }
+
     }
 }
