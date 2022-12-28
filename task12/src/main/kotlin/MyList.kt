@@ -8,7 +8,9 @@ class MyList<T : Comparable<T>> {
     private var head: Node<T>? = null
 
     fun add(forAdd: T) {
-        head = Node(forAdd, head)
+        synchronized(this) {
+            head = Node(forAdd, head)
+        }
     }
 
     fun print() {
