@@ -1,10 +1,11 @@
 import java.util.concurrent.Semaphore
+import java.util.concurrent.locks.ReentrantLock
 
 fun main() {
-    val a = Semaphore(0)
-    val b = Semaphore(0)
-    val c = Semaphore(0)
-    val modules = Semaphore(0)
+    val a = SemaphoreWithLimit(5)
+    val b = SemaphoreWithLimit(3)
+    val c = SemaphoreWithLimit(2)
+    val modules = SemaphoreWithLimit(2)
 
     // making a details
     var aCount = 0
@@ -59,4 +60,36 @@ fun main() {
             println("${++widgetCount} widget has been produced")
         }
     }.start()
+}
+
+
+class SemaphoreWithLimit(
+    private val Limit: Int
+) {
+    private val semaphore = Semaphore(0)
+    private val lock = ReentrantLock()
+    private val condition = lock.newCondition()
+
+    fun release() {
+        lock.lock()
+        try {
+            while (semaphore.availablePermits() >= Limit) {
+                println("One semaphore was locked")
+                condition.await()
+            }
+            semaphore.release()
+        } finally {
+            lock.unlock()
+        }
+    }
+
+    fun acquire() {
+        semaphore.acquire()
+        lock.lock()
+        try {
+            condition.signalAll()
+        } finally {
+            lock.unlock()
+        }
+    }
 }
