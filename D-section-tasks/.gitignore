@@ -31,3 +31,5 @@
 # Gradle
 .idea/**/gradle.xml
 .idea/**/libraries
+
+database/
