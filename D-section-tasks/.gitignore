@@ -32,4 +32,4 @@
 .idea/**/gradle.xml
 .idea/**/libraries
 
-database/
+database/*
