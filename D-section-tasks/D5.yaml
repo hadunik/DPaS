@@ -1,0 +1,345 @@
+openapi: 3.0.0
+info:
+  title: D5
+  contact: {}
+  version: '1.0'
+components:
+  schemas:
+    City:
+      type: object
+      properties:
+        name:
+          type: string
+          format: string
+          description: the name of the city
+        timezone:
+          type: string
+          format: string
+          description: the timezone of the city
+    FlightDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: string
+          description: unique id for the flight
+        number:
+          type: string
+          format: string
+          description: recognized flight number
+        airport:
+          $ref: '#/components/schemas/AirportDto'
+        airportDest:
+          $ref: '#/components/schemas/AirportDto'
+        dataDeparture:
+          type: string
+          description: departure date of the aircraft
+        dataArrival:
+          type: string
+          description: date of arrival of the aircraft
+        timeDeparture:
+          type: string
+          description: departure date of the aircraft
+        timeArrival:
+          type: string
+          description: date of arrival of the aircraft
+    AirportDto:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+          format: string
+          description: airport code
+        city:
+          $ref: '#/components/schemas/City'
+    BookingRequest:
+      properties:
+        passenger_id: 
+          type: string
+        flightIds:
+          type: array
+          items:
+            type: string
+        fairConds:
+          type: array
+          items:
+            type: string
+    CheckinRequest:
+      properties:
+        passenger_id:
+          type: string
+        flight_id:
+          type: string
+        seat_number:
+          type: string
+        
+servers:
+  - url: http://localhost:8080/api/D5
+    variables: {}
+paths:
+  /cities:
+    get:
+      tags:
+        - Development
+      summary: Get cities
+      operationId: Get cities
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/City'
+      deprecated: false
+  /airports:
+    get:
+      tags:
+        - Development
+      summary: Get airports
+      operationId: Get airports
+      parameters: []
+      responses:
+        '200':
+          description: The list of all available airports
+          headers: {}
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AirportDto'
+      deprecated: false
+  /airports/incity:
+    get:
+      tags:
+        - Development
+      summary: Get the airports within a city
+      operationId: Get the airports within a city
+      parameters:
+        - name: city
+          in: query
+          description: the thecity where you want to see all the airports
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+            example: SomeCity
+      responses:
+        '200':
+          description: The list of all available airports
+          headers: {}
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AirportDto'
+        '400':
+          description: no airports have been found for this city
+          content:
+            text/plain:
+              example: No airport in this city
+      deprecated: false
+  /airports/inbound:
+    get:
+      tags:
+        - Development
+      summary: Get schedule inbound
+      operationId: Get schedule inbound
+      parameters:
+        - name: airport
+          in: query
+          description: the airport you wanna see the inbound schedule for
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+            example: first-airport
+      responses:
+        '200':
+          description: list the inbound schedule for an airport
+          headers: {}
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/FlightDto'
+        '400':
+          description: no flights have been found for this airport
+          content:
+            text/plain:
+              example: No flights for this airport
+      deprecated: false
+  /airports/outbound:
+    get:
+      tags:
+        - Development
+      summary: Get schedule outbound
+      operationId: Get schedule outbound
+      parameters:
+        - name: airport
+          in: query
+          description: the airport you wanna see the outbound schedule for
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+            example: first-airport
+      responses:
+        '200':
+          description: list  the outbound schedule for an airport
+          headers: {}
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/FlightDto'
+        '400':
+          description: no flights have been found for this airport
+          content:
+            text/plain:
+              example: No flights for this airport
+      deprecated: false
+  /flights:
+    get:
+      tags:
+        - Development
+      summary: Get flights by destination
+      operationId: Get flights by destination
+      parameters:
+        - name: citySource
+          in: query
+          description: the city from which user wants to flight
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            example: second-city
+        - name: cityDest
+          in: query
+          description: the city where user wants to flight
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            example: first-city
+        - name: airportSource
+          in: query
+          description: the airport from which user wants to flight
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            example: first-airport
+        - name: airportDest
+          in: query
+          description: the airport where user wants to flight
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            example: first-airport
+        - name: booking class
+          in: query
+          description: service class for the user
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            enum: ['Economy', 'Comfort', 'Business']
+            example: 'Economy'
+        - name: departure date
+          in: query
+          description: departure date for flightbetween 0:00:00 of the specified date and 0:00:00
+          required: false
+          style: form
+          schema:
+            type: integer
+            example: '2017-09-10'
+        - name: upperBound
+          in: query
+          description: amount of peresadok
+          required: false
+          style: form
+          schema:
+            type: integer
+            example: '3'
+      responses:
+        '200':
+          description: list of available flights
+          headers: {}
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/FlightDto'
+        '400':
+          description: No flights available according to these parameters
+          content:
+            text/plain:
+              example: There's no flight according to these parameters
+      deprecated: false
+  /flights/booking:
+    post:
+      tags:
+        - Development
+      summary: Booking
+      operationId: Booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+      responses:
+        '200':
+          description: user successfully book the place to flight
+          headers: {}
+          content:
+            text/plain:
+              example: You have checkout to this flight(s)
+        '400':
+          description: user cannot book this place
+          content:
+            text/plain:
+              example: You cannot book to this flight(s)
+      deprecated: false
+  /flights/checkout:
+    post:
+      tags:
+        - Development
+      summary: Checkout
+      operationId: Checkout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckinRequest'
+      responses:
+        '200':
+          description: successfully checkout
+          headers: {}
+          content:
+            text/plain:
+              example: You have checkout to this flight
+        '400':
+          description: user cannot checkout this place
+          content:
+            text/plain:
+              example: You cannot checkout this flight
+      deprecated: false
+tags:
+  - name: Development
+    description: some undefined tag
